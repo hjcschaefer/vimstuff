@@ -1,0 +1,223 @@
+" Heikos vimrc
+"
+
+set nocompatible " do not act like vi
+
+set nohlsearch
+set incsearch
+set smartcase
+
+filetype on      " determine file type and cause FileType event
+filetype plugin on " load ftplugin.vim: filetype dependent plugins get loaded
+filetype indent on " load ft dependent indent.vim ?
+
+" set UTF-8 encoding
+set enc=utf-8
+set fenc=utf-8
+set termencoding=utf-8
+set wildmenu
+
+set backspace=2
+
+" COLOR
+" colorscheme hse
+
+" ------------------------------------------ indentation stuff
+syntax enable
+
+
+" disable vi compatibility (emulation of old bugs)
+" use indentation of previous line
+set autoindent
+" use intelligent indentation for C
+set smartindent
+" configure tabwidth and insert spaces instead of tabs
+set tabstop=4        " tab width is 4 spaces
+set shiftwidth=4     " indent also with 4 spaces
+set expandtab        " expand tabs to spaces
+
+map <F1> :Vexplore<CR>
+let g:netrw_liststyle = 3  " file browser layout
+let g:netrw_banner = 0 " do not show banner
+let g:netrw_browse_split =4 " open in old frame
+let g:netrw_winsize = 25 " only 1/4 screen wide
+let g:netrw_altv = 1 " dir stays left
+
+" wrap lines at 120 chars. 80 is somewhat antiquated with nowadays displays.
+set textwidth=120
+" turn syntax highlighting on
+" set t_Co=256
+
+
+" turn line numbers on
+set number
+" highlight matching braces
+set showmatch
+" intelligent comments
+set comments=sl:/*,mb:\ *,elx:\ */
+
+" indent when wrapping parameters
+set cino=(0,g0
+
+" include guards
+function! s:insert_gates()
+  let gatename = substitute(toupper(expand("%:t")), "\\.", "_", "g")
+  execute "normal! i#pragma once"
+  execute "normal! o#ifndef " . gatename
+  execute "normal! o#define " . gatename . ""
+  execute "normal! Go#endif /* " . gatename . " */"
+  normal! ko
+endfunction
+
+autocmd BufNewFile *.{h,hpp} call <SID>insert_gates()
+
+:com -nargs=1 RT :!ctest -R <f-args> -V
+:com -nargs=0 CM :!cmake ..
+:com -nargs=0 GT :!git diff
+:com -nargs=0 GL :!git log
+:com -nargs=0 GS :!git status
+:com -nargs=1 T :!unixtime  <f-args> 
+:command! BW :bn|:bd#
+:command! Gitdiff :!git diff
+:command! Gitstatus :!git status
+
+
+
+" tw +1 gets highlighted
+set colorcolumn=+1
+hi ColorColumn ctermbg=blue
+
+
+let g:alternateExtensions_CPP = "inc,h,H,HPP,hpp"
+
+
+" Switch on vim airline
+set laststatus=2
+" let g:airline#extensions#tabline#enabled = 1
+" let g:airline_theme = 'zenburn'
+
+" git commit
+autocmd FileType gitcommit set tw=72
+
+" fuzzy file search Ctrlp
+set runtimepath^=~/.vim/bundle/ctrlp.vim
+let g:ctrlp_working_path_mode = 'ra'
+" Exclude build dirs
+let g:ctrlp_custom_ignore = {
+  \ 'dir':  '\.git$\|mm$\|builddir$\|mvnbuild$\|target$' }
+
+" define RR to run current test
+function! RunTest()
+    let l:cmd = expand('<cword>')
+    let l:fn = split(expand('%'), '/')
+    let l:idx = index(l:fn, 'test')
+    let l:d1 = l:fn[l:idx+2]
+    let l:d2 = l:fn[l:idx+3]
+    let l:testname = expand('%:t:r')
+    if l:idx == -1
+        return
+    endif
+    if l:d1 == "IMCPricing"
+        execute "command! RR :!./pricing-native/src/test/cpp/IMCPricing/".l:d2."/imcpricing-".l:d2."-test --gtest_filter=".l:testname.".".l:cmd
+        execute "command! MM :make imcpricing-".l:d2."-test"
+    else
+        execute "command! RR :!./pricing-native/src/test/cpp/".l:d1."/".l:d1."-test --gtest_filter=".l:testname.".".l:cmd
+        execute "command! MM :make ".l:d1."-test"
+    endif
+endfunction()
+
+
+function! RunAllTestsInFile()
+    let l:fn = split(expand('%'), '/')
+    let l:idx = index(l:fn, 'test')
+    let l:d1 = l:fn[l:idx+2]
+    let l:d2 = l:fn[l:idx+3]
+    let l:xx = expand('%:t:r')
+    if l:idx == -1
+        return
+    endif
+    if l:d1 == "IMCPricing"
+        let l:exe = "imcpricing-".l:d2."-test"
+        execute ":!make ".l:exe." && ./pricing-native/src/test/cpp/IMCPricing/".l:d2."/imcpricing-".l:d2."-test --gtest_filter=".l:xx.".*"
+    else
+        let l:exe = l:d1."-test"
+        execute ":!make ".l:exe." && ./pricing-native/src/test/cpp/".l:d1."/".l:d1."-test --gtest_filter=".l:xx.".*"
+    endif
+endfunction()
+
+function! RunAllTestsInSuite()
+    let l:fn = split(expand('%'), '/')
+    let l:idx = index(l:fn, 'test')
+    let l:d1 = l:fn[l:idx+2]
+    let l:d2 = l:fn[l:idx+3]
+    if l:idx == -1
+        return
+    endif
+    if l:d1 == "IMCPricing"
+        let l:exe = "imcpricing-".l:d2."-test"
+        execute ":!make ".l:exe." && ./pricing-native/src/test/cpp/IMCPricing/".l:d2."/imcpricing-".l:d2."-test"
+    else
+        let l:exe = l:d1."-test"
+        execute ":!make ".l:exe." && ./pricing-native/src/test/cpp/".l:d1."/".l:d1."-test"
+    endif
+endfunction()
+
+function! AddNewTest()
+    let l:testname = expand('%:t:r')
+    return 'TEST_F('.l:testname.', ) {'
+endfunction()
+
+
+" Folding
+set foldmethod=syntax " indent
+set foldlevelstart=20
+" map <F12> zR
+map <F11> zozz
+map <F10> zc
+map <F9> zM
+
+:nnoremap __ :call RunTestNew()<CR>mT
+map <F4> :call RunAllTestsInFileNew()<CR>
+map <F8> :MM<CR>:RR<CR>
+map <F5> :call RunAllTestsInSuiteNew()<CR>
+
+nnoremap ,nt o<C-R>=AddNewTest()<CR><Esc>F,la
+map <F2> :!git diff <C-R>=expand('%')<CR><CR>
+map <F3> :!git blame <C-R>=expand('%')<CR><CR>
+
+
+
+
+
+
+
+function! BufSel(pattern)
+    let bufcount = bufnr("$")
+    let currbufnr = 1
+    let nummatches = 0
+    let firstmatchingbufnr = 0
+    while currbufnr <= bufcount
+        if(bufexists(currbufnr))
+            let currbufname = bufname(currbufnr)
+            if(match(currbufname, a:pattern) > -1)
+                echo currbufnr . ": ". bufname(currbufnr)
+                let nummatches += 1
+                let firstmatchingbufnr = currbufnr
+            endif
+        endif
+        let currbufnr = currbufnr + 1
+    endwhile
+    if(nummatches == 1)
+        execute ":buffer ". firstmatchingbufnr
+    elseif(nummatches > 1)
+        let desiredbufnr = input("Enter buffer number: ")
+        if(strlen(desiredbufnr) != 0)
+            execute ":buffer ". desiredbufnr
+        endif
+    else
+        echo "No matching buffers"
+    endif
+endfunction
+
+"Bind the BufSel() function to a user-command 
+command!  -nargs=1 Bs :call BufSel("<args>")
