@@ -106,68 +106,6 @@ let g:ctrlp_working_path_mode = 'ra'
 let g:ctrlp_custom_ignore = {
   \ 'dir':  '\.git$\|mm$\|builddir$\|mvnbuild$\|target$' }
 
-" define RR to run current test
-function! RunTest()
-    let l:cmd = expand('<cword>')
-    let l:fn = split(expand('%'), '/')
-    let l:idx = index(l:fn, 'test')
-    let l:d1 = l:fn[l:idx+2]
-    let l:d2 = l:fn[l:idx+3]
-    let l:testname = expand('%:t:r')
-    if l:idx == -1
-        return
-    endif
-    if l:d1 == "IMCPricing"
-        execute "command! RR :!./pricing-native/src/test/cpp/IMCPricing/".l:d2."/imcpricing-".l:d2."-test --gtest_filter=".l:testname.".".l:cmd
-        execute "command! MM :make imcpricing-".l:d2."-test"
-    else
-        execute "command! RR :!./pricing-native/src/test/cpp/".l:d1."/".l:d1."-test --gtest_filter=".l:testname.".".l:cmd
-        execute "command! MM :make ".l:d1."-test"
-    endif
-endfunction()
-
-
-function! RunAllTestsInFile()
-    let l:fn = split(expand('%'), '/')
-    let l:idx = index(l:fn, 'test')
-    let l:d1 = l:fn[l:idx+2]
-    let l:d2 = l:fn[l:idx+3]
-    let l:xx = expand('%:t:r')
-    if l:idx == -1
-        return
-    endif
-    if l:d1 == "IMCPricing"
-        let l:exe = "imcpricing-".l:d2."-test"
-        execute ":!make ".l:exe." && ./pricing-native/src/test/cpp/IMCPricing/".l:d2."/imcpricing-".l:d2."-test --gtest_filter=".l:xx.".*"
-    else
-        let l:exe = l:d1."-test"
-        execute ":!make ".l:exe." && ./pricing-native/src/test/cpp/".l:d1."/".l:d1."-test --gtest_filter=".l:xx.".*"
-    endif
-endfunction()
-
-function! RunAllTestsInSuite()
-    let l:fn = split(expand('%'), '/')
-    let l:idx = index(l:fn, 'test')
-    let l:d1 = l:fn[l:idx+2]
-    let l:d2 = l:fn[l:idx+3]
-    if l:idx == -1
-        return
-    endif
-    if l:d1 == "IMCPricing"
-        let l:exe = "imcpricing-".l:d2."-test"
-        execute ":!make ".l:exe." && ./pricing-native/src/test/cpp/IMCPricing/".l:d2."/imcpricing-".l:d2."-test"
-    else
-        let l:exe = l:d1."-test"
-        execute ":!make ".l:exe." && ./pricing-native/src/test/cpp/".l:d1."/".l:d1."-test"
-    endif
-endfunction()
-
-function! AddNewTest()
-    let l:testname = expand('%:t:r')
-    return 'TEST_F('.l:testname.', ) {'
-endfunction()
-
-
 " Folding
 set foldmethod=syntax " indent
 set foldlevelstart=20
@@ -176,10 +114,10 @@ map <F11> zozz
 map <F10> zc
 map <F9> zM
 
-:nnoremap __ :call RunTestNew()<CR>mT
-map <F4> :call RunAllTestsInFileNew()<CR>
+:nnoremap __ :call RunTest()<CR>mT
+map <F4> :call RunAllTestsInFile()<CR>
 map <F8> :MM<CR>:RR<CR>
-map <F5> :call RunAllTestsInSuiteNew()<CR>
+map <F5> :call RunAllTestsInSuite()<CR>
 
 nnoremap ,nt o<C-R>=AddNewTest()<CR><Esc>F,la
 map <F2> :!git diff <C-R>=expand('%')<CR><CR>

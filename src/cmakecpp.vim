@@ -19,7 +19,7 @@ function! GetTestExecutable()
     endif
 endfunction()
 
-function! RunTestNew()
+function! RunTest()
     let l:exe = GetTestExecutable()
     let l:cmd = expand('<cword>')
     let l:testname = expand('%:t:r')
@@ -28,20 +28,23 @@ function! RunTestNew()
     execute "command! MM :make " . l:target
 endfunction()
 
-function! RunAllTestsInFileNew()
+function! RunAllTestsInFile()
     let l:exe = GetTestExecutable()
     let l:testname = expand('%:t:r')
     let l:target = split(l:exe, '/')[-1]
     execute ":!make " . l:target . "&&" . l:exe . ' --gtest_filter=' . l:testname . '.*'
 endfunction()
 
-function! RunAllTestsInSuiteNew()
+function! RunAllTestsInSuite()
     let l:exe = GetTestExecutable()
     let l:testname = expand('%:t:r')
     let l:target = split(l:exe, '/')[-1]
     execute ":!make " . l:target . "&&" . l:exe
 endfunction()
 
-
+function! AddNewTest()
+    let l:testname = expand('%:t:r')
+    return 'TEST_F('.l:testname.', ) {'
+endfunction()
 
 
