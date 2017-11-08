@@ -1,6 +1,7 @@
-" Heikos vimrc
+" =========================
 "
 
+" ------------------  Generic stuff
 set nocompatible " do not act like vi
 
 set nohlsearch   " only hilight search while typing it in
@@ -8,6 +9,16 @@ set incsearch    " hilight as long as pattern matches while typing
 set smartcase    " ignorecase unless you use a capital letter, then case sensitive
 set wildmenu     " status bar shows next matches
 syntax enable    " syntax hilightning on
+set laststatus=2
+
+" turn line numbers on
+set number
+" highlight matching braces
+set showmatch
+" intelligent comments
+set comments=sl:/*,mb:\ *,elx:\ */
+
+
 
 filetype on      " determine file type and cause FileType event
 filetype plugin on " load ftplugin.vim: filetype dependent plugins get loaded
@@ -20,7 +31,7 @@ set termencoding=utf-8
 
 set backspace=2   " sane BS behaviour
 
-" COLOR
+" ------------------------   COLORSCHEMES
 " colorscheme hse
 
 " ------------------------------------------ indentation stuff
@@ -37,6 +48,9 @@ set cino=(0,g0
 
 " wrap lines at 120 chars. 80 is somewhat antiquated with nowadays displays.
 set textwidth=120
+" tw +1 gets highlighted
+set colorcolumn=+1
+hi ColorColumn ctermbg=blue
 
 
 " ------------ NETRW configuration
@@ -46,18 +60,8 @@ let g:netrw_browse_split =4 " open in old frame
 let g:netrw_winsize = 25 " only 1/4 screen wide
 let g:netrw_altv = 1 " dir stays left
 
-" turn syntax highlighting on
-" set t_Co=256
 
-
-" turn line numbers on
-set number
-" highlight matching braces
-set showmatch
-" intelligent comments
-set comments=sl:/*,mb:\ *,elx:\ */
-
-
+" -------------------------- Header Files
 " include guards
 function! s:insert_gates()
   execute "normal! i#pragma once\<esc>o\<cr>"
@@ -67,32 +71,24 @@ autocmd BufNewFile *.{h,hpp} call <SID>insert_gates()
 
 :com -nargs=1 RT :!ctest -R <f-args> -V
 :com -nargs=0 CM :!cmake ..
-:com -nargs=0 GT :!git diff
-:com -nargs=0 GL :!git log
-:com -nargs=0 GS :!git status
 :com -nargs=1 T :!unixtime  <f-args>
 :command! BW :bn|:bd#
-:command! Gitdiff :!git diff
-:command! Gitstatus :!git status
 
-
-
-" tw +1 gets highlighted
-set colorcolumn=+1
-hi ColorColumn ctermbg=blue
 
 
 let g:alternateExtensions_CPP = "inc,h,H,HPP,hpp"
 
 
-" Switch on vim airline
-set laststatus=2
-" let g:airline#extensions#tabline#enabled = 1
-" let g:airline_theme = 'zenburn'
-
+" -------------- GIT stuff
 " git commit
 autocmd FileType gitcommit set tw=72
+:com -nargs=0 GT :!git diff
+:com -nargs=0 GL :!git log
+:com -nargs=0 GS :!git status
+:command! Gitdiff :!git diff
+:command! Gitstatus :!git status
 
+" ---------------------- CTRL-P -----------------
 " fuzzy file search Ctrlp
 set runtimepath^=~/.vim/bundle/ctrlp.vim
 let g:ctrlp_working_path_mode = 'ra'
@@ -100,13 +96,13 @@ let g:ctrlp_working_path_mode = 'ra'
 let g:ctrlp_custom_ignore = {
   \ 'dir':  '\.git$\|mm$\|builddir$\|mvnbuild$\|target$' }
 
+" ------------------------- FOLDING ----------------
 " Folding
 set foldmethod=syntax " indent
 set foldlevelstart=20
 
 :nnoremap __ :call RunTest()<CR>mT
 
-nnoremap ,nt o<C-R>=AddNewTest()<CR><Esc>F,la
 
 " ---------- Function Key Assignments
 map <F1> :Vexplore<CR>
@@ -120,9 +116,7 @@ map <F10> zc
 map <F11> zozz
 map <F12> zR
 
-
-
-
+nnoremap ,nt o<C-R>=AddNewTest()<CR><Esc>F,la
 
 
 
