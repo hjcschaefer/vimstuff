@@ -3,9 +3,11 @@
 
 set nocompatible " do not act like vi
 
-set nohlsearch
-set incsearch
-set smartcase
+set nohlsearch   " only hilight search while typing it in
+set incsearch    " hilight as long as pattern matches while typing
+set smartcase    " ignorecase unless you use a capital letter, then case sensitive
+set wildmenu     " status bar shows next matches
+syntax enable    " syntax hilightning on
 
 filetype on      " determine file type and cause FileType event
 filetype plugin on " load ftplugin.vim: filetype dependent plugins get loaded
@@ -15,18 +17,13 @@ filetype indent on " load ft dependent indent.vim ?
 set enc=utf-8
 set fenc=utf-8
 set termencoding=utf-8
-set wildmenu
 
-set backspace=2
+set backspace=2   " sane BS behaviour
 
 " COLOR
 " colorscheme hse
 
 " ------------------------------------------ indentation stuff
-syntax enable
-
-
-" disable vi compatibility (emulation of old bugs)
 " use indentation of previous line
 set autoindent
 " use intelligent indentation for C
@@ -35,16 +32,20 @@ set smartindent
 set tabstop=4        " tab width is 4 spaces
 set shiftwidth=4     " indent also with 4 spaces
 set expandtab        " expand tabs to spaces
+" indent when wrapping parameters
+set cino=(0,g0
 
-map <F1> :Vexplore<CR>
+" wrap lines at 120 chars. 80 is somewhat antiquated with nowadays displays.
+set textwidth=120
+
+
+" ------------ NETRW configuration
 let g:netrw_liststyle = 3  " file browser layout
 let g:netrw_banner = 0 " do not show banner
 let g:netrw_browse_split =4 " open in old frame
 let g:netrw_winsize = 25 " only 1/4 screen wide
 let g:netrw_altv = 1 " dir stays left
 
-" wrap lines at 120 chars. 80 is somewhat antiquated with nowadays displays.
-set textwidth=120
 " turn syntax highlighting on
 " set t_Co=256
 
@@ -56,17 +57,10 @@ set showmatch
 " intelligent comments
 set comments=sl:/*,mb:\ *,elx:\ */
 
-" indent when wrapping parameters
-set cino=(0,g0
 
 " include guards
 function! s:insert_gates()
-  let gatename = substitute(toupper(expand("%:t")), "\\.", "_", "g")
-  execute "normal! i#pragma once"
-  execute "normal! o#ifndef " . gatename
-  execute "normal! o#define " . gatename . ""
-  execute "normal! Go#endif /* " . gatename . " */"
-  normal! ko
+  execute "normal! i#pragma once\<esc>o\<cr>"
 endfunction
 
 autocmd BufNewFile *.{h,hpp} call <SID>insert_gates()
@@ -76,7 +70,7 @@ autocmd BufNewFile *.{h,hpp} call <SID>insert_gates()
 :com -nargs=0 GT :!git diff
 :com -nargs=0 GL :!git log
 :com -nargs=0 GS :!git status
-:com -nargs=1 T :!unixtime  <f-args> 
+:com -nargs=1 T :!unixtime  <f-args>
 :command! BW :bn|:bd#
 :command! Gitdiff :!git diff
 :command! Gitstatus :!git status
@@ -109,19 +103,22 @@ let g:ctrlp_custom_ignore = {
 " Folding
 set foldmethod=syntax " indent
 set foldlevelstart=20
-" map <F12> zR
-map <F11> zozz
-map <F10> zc
-map <F9> zM
 
 :nnoremap __ :call RunTest()<CR>mT
-map <F4> :call RunAllTestsInFile()<CR>
-map <F8> :MM<CR>:RR<CR>
-map <F5> :call RunAllTestsInSuite()<CR>
 
 nnoremap ,nt o<C-R>=AddNewTest()<CR><Esc>F,la
+
+" ---------- Function Key Assignments
+map <F1> :Vexplore<CR>
 map <F2> :!git diff <C-R>=expand('%')<CR><CR>
 map <F3> :!git blame <C-R>=expand('%')<CR><CR>
+map <F4> :call RunAllTestsInFile()<CR>
+map <F5> :call RunAllTestsInSuite()<CR>
+map <F8> :MM<CR>:RR<CR>
+map <F9> zM
+map <F10> zc
+map <F11> zozz
+map <F12> zR
 
 
 
@@ -157,5 +154,5 @@ function! BufSel(pattern)
     endif
 endfunction
 
-"Bind the BufSel() function to a user-command 
+"Bind the BufSel() function to a user-command
 command!  -nargs=1 Bs :call BufSel("<args>")
