@@ -1,7 +1,13 @@
 
+function! Relpath(filename)
+    let cwd = fnamemodify(getcwd(), ':h')
+    let s =  './' .  substitute(a:filename, l:cwd . "/" , "", "")
+    return s
+endfunction
+
 function! GetTestExecutable()
     " find closest CMakeLists.txt
-    let l:path = expand('%:h') " path without current file
+    let l:path = expand('%:p:h') " path without current file
     " check if we have a CMakeLists.txt here
     if !filereadable(l:path . "/CMakeLists.txt")
         let l:path = fnamemodify(l:path, ':h')
@@ -14,7 +20,8 @@ function! GetTestExecutable()
     if (len(l:gtest) > 0)
         let l:tt = matchlist(l:gtest, '\w\+(\(.\+\)\s')
         let l:testname = l:tt[1]
-        let l:executable = './' . join(split(l:path, '/')[1:], '/') . '/' . l:testname . '-test'
+        let l:pathx = Relpath(expand('%:p:h')) " relative path without current file
+        let l:executable = l:pathx . '/' . l:testname . '-test'
         return(l:executable)
     endif
 endfunction()

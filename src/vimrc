@@ -3,6 +3,7 @@
 
 " ------------------  Generic stuff
 set nocompatible " do not act like vi
+set background=dark
 
 set nohlsearch   " only hilight search while typing it in
 set incsearch    " hilight as long as pattern matches while typing
