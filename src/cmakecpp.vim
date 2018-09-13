@@ -24,7 +24,7 @@ function! GetTestExecutable()
     " try to get test name
     let l:gtest = system('grep -i add_gtest ' . l:path . '/CMakeLists.txt')
     if (len(l:gtest) > 0)
-        let l:tt = matchlist(l:gtest, '\w\+(\(\w\+\)\s')
+        let l:tt = matchlist(l:gtest,  '\w\+(\(\S\+\)\s\+')
         let l:testname = l:tt[1]
         let l:path_to_exe = Relpath(l:path)
         let l:executable = l:path_to_exe . '/' . l:testname . '-test'
@@ -32,12 +32,19 @@ function! GetTestExecutable()
     endif
 endfunction()
 
+function! ParseTestDefinition()
+    let l:line = getline('.')
+    let l:parts = matchlist(l:line, 'TEST_F(\(.\+\),\s\+\(.\+\))') " (\(\w+\))')
+    return " --gtest_filter=" . l:parts[1]  . "." . l:parts[2]
+endfunction()
+
 function! RunTest()
     let l:exe = GetTestExecutable()
     let l:cmd = expand('<cword>')
     let l:testname = expand('%:t:r')
     let l:target = split(l:exe, '/')[-1]
-    execute "command! RR :!" . l:exe . " --gtest_filter=" . l:testname . "." . l:cmd
+    let l:filter = ParseTestDefinition()
+    execute "command! RR :!" . l:exe . l:filter
     execute "command! MM :make " . l:target
 endfunction()
 
