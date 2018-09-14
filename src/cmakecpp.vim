@@ -56,7 +56,7 @@ function! RunTest()
     let l:testclass = ParseTestDefinition2()
     execute "command! RR :!" . l:exe . l:filter
     execute "command! MM :make " . l:target
-    call WriteGDBInit(l:exe, l:filter, l:testclass, line('.')+1)
+    call WriteGDBInit(l:exe, l:filter, expand('%:t'), line('.')+1)
 endfunction()
 
 function! RunAllTestsInFile()
@@ -82,7 +82,7 @@ function! WriteGDBInit(exename, filter, srcname, lineno)
     new .gdbinit
     1,$delete
     call append('$', 'file ' . a:exename)
-    call append('$', 'b ' . a:srcname . '.cpp:' . a:lineno)
+    call append('$', 'b ' . a:srcname . ':' . a:lineno)
     call append('$', 'r ' . a:filter)
     write
     quit
