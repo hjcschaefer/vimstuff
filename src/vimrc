@@ -158,3 +158,14 @@ endfunction
 
 "Bind the BufSel() function to a user-command
 command!  -nargs=1 Bs :call BufSel("<args>")
+
+" find clang file in the parent directory and try to read ColumnLimit to set textwidth
+if filereadable("../.clang-format")
+    let content = readfile("../.clang-format")
+    for line in content
+        let match = matchlist(line, '^ColumnLimit: \(\d\+\)')
+        if (!empty(match))
+            let &textwidth=str2nr(match[1])
+        endif
+    endfo
+endif
