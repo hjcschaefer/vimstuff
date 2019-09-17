@@ -1,12 +1,33 @@
 
+function! Gitblame()
+    " Get current file
+    let l:fname = expand('%')
+    let l:lineno = line('.')
+    let l:lastline = line('$')
+    let l:linestart = max([l:lineno-5, 1])
+    let l:lineend = min([l:lineno+5, l:lastline])
+    let l:blame = system('git blame -L ' . l:linestart . ',' . l:lineend . ' ' . l:fname)
+    return l:blame
+endfunction
+
+function! Gitblame2()
+    let l:fname = expand('%')
+    let l:lineno = line('.')
+    let l:blame = system('git blame -L ' . l:lineno . ',' . l:lineno . ' ' . l:fname)
+    let l:sha = split(l:blame, ' ')[0]
+    return system('git show ' . l:sha)
+endfunction
+
+
 function! Relpath(filename)
-    let cwd = fnamemodify(getcwd(), ':h')
+    " Bad hack to get /export in and work on linux
+    let l:cwd = fnamemodify(getcwd(), ':h:s?export??')
     let s =  './' .  substitute(a:filename, l:cwd . "/" , "", "")
     return s
 endfunction
 
 function! FindNearestCmakeFile()
-    let l:path = expand('%:p:h') " path without current file
+    let l:path = expand('%:p:h:s?export??') " path without current file
     let l:n = 0
     while !filereadable(l:path . "/CMakeLists.txt") && l:n < 5
         let l:path = fnamemodify(l:path, ':h')
@@ -23,11 +44,9 @@ function! GetTestExecutable()
     let l:path = FindNearestCmakeFile()
     " try to get test name
     let l:gtest = system('grep -i add_gtest ' . l:path . '/CMakeLists.txt')
-    echo l:gtest
     if (len(l:gtest) > 0)
         let l:tt = matchlist(l:gtest,  '\w\+(\(\S\+\)\s\+')
         " let l:tt = matchlist(l:gtest,  '\w\+(\(.\+\)\s\+')
-        echo l:tt
         let l:testname = l:tt[1]
         let l:path_to_exe = Relpath(l:path)
         let l:executable = l:path_to_exe . '/' . l:testname . '-test'
@@ -82,6 +101,7 @@ function! WriteGDBInit(exename, filter, srcname, lineno)
     new .gdbinit
     1,$delete
     call append('$', 'file ' . a:exename)
+    call append('$', 'catch throw')
     call append('$', 'b ' . a:srcname . ':' . a:lineno)
     call append('$', 'r ' . a:filter)
     write

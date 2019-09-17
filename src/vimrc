@@ -44,8 +44,9 @@ set smartindent
 set tabstop=4        " tab width is 4 spaces
 set shiftwidth=4     " indent also with 4 spaces
 set expandtab        " expand tabs to spaces
-" indent when wrapping parameters
-set cino=(0,g0
+" 2*shift for parameter list wrap, no indent for public: private:
+set cino=g0
+"set cino=(0,g0
 
 " wrap lines at 120 chars. 80 is somewhat antiquated with nowadays displays.
 set textwidth=120
@@ -85,7 +86,6 @@ let g:alternateExtensions_CPP = "inc,h,H,HPP,hpp"
 " git commit
 autocmd FileType gitcommit set tw=72
 autocmd FileType gitcommit set spell
-
 :com -nargs=0 GT :!git diff
 :com -nargs=0 GL :!git log
 :com -nargs=0 GS :!git status
@@ -107,24 +107,32 @@ set foldlevelstart=20
 
 :nnoremap __ :call RunTest()<CR>mT
 
-
 " ---------- Function Key Assignments
 map <F1> :Vexplore<CR>
 map <F2> :!git diff <C-R>=expand('%')<CR><CR>
-map <F3> :!git blame <C-R>=expand('%')<CR><CR>
+map <F3> :echo Gitblame()<CR>
+map <Leader><F3> :echo Gitblame2()<CR>
 map <F4> :call RunAllTestsInFile()<CR>
 map <F5> :call RunAllTestsInSuite()<CR>
 map <F6> :!git diff HEAD^..HEAD <C-R>=expand('%')<CR><CR>
 map <F8> :MM<CR>:RR<CR>
 map <F12> :!git log -L <C-r>=line('.')<CR>,+1:<C-r>=expand('%')<CR><CR>
 
-" I never use folding in practice.
+
+" Folding stuff: I never really used that
 " map <F9> zM
 " map <F10> zc
-" map <F11> zozz
+" map <F11> zo
 " map <F12> zR
 
 nnoremap ,nt o<C-R>=AddNewTest()<CR><Esc>F,la
+
+" LATEX STUFF
+nnoremap eqq o<C-R>\\begin{equation}<CR>\end{equation}<Esc>O
+nnoremap eqn o<C-R>\\begin{eqnarray}<CR>\end{eqnarray}<Esc>O
+
+" Open tag in new vertical split
+map <F7> :vsp <CR>:exec("tag ".expand("<cword>"))<CR>
 
 
 
